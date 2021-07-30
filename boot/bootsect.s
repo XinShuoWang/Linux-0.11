@@ -56,7 +56,7 @@ _start:
 	sub	%si, %si		#源地址	ds:si = 0x07C0:0x0000
 	sub	%di, %di		#目标地址 es:si = 0x9000:0x0000
 	rep					#重复执行并递减cx的值
-	movsw				#从内存[si]处移动cx个字到[di]处
+	movsw				#从内存[si]处移动cx个字到[di]处，是数据传送指令,都是从源地址向目的地址传送数据，16位模式下：源地址是DS:SI,目的地址是ES:DI
 	ljmp	$INITSEG, $go	#段间跳转，这里INITSEG指出跳转到的段地址，解释了cs的值为0x9000
 go:	mov	%cs, %ax		#将ds，es，ss都设置成移动后代码所在的段处(0x9000)
 	mov	%ax, %ds

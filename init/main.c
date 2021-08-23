@@ -58,8 +58,8 @@ extern long startup_time;
  * This is set up by the setup-routine at boot-time
  */
 #define EXT_MEM_K (*(unsigned short *)0x90002)
-#define DRIVE_INFO (*(struct drive_info *)0x90080)
-#define ORIG_ROOT_DEV (*(unsigned short *)0x901FC)
+#define DRIVE_INFO (*(struct drive_info *)0x90080)  // 硬盘参数表的32字节内容
+#define ORIG_ROOT_DEV (*(unsigned short *)0x901FC)  // 根文件系统所在的设备号
 
 /*
  * Yeah, yeah, it's ugly, but I cannot find how to do this correctly
@@ -80,7 +80,7 @@ static void time_init(void)
 	struct tm time;
 
 	do {
-		time.tm_sec = CMOS_READ(0);
+		time.tm_sec = CMOS_READ(0);  // 读取出来的是BCD码的时间，后续还需要转换成二进制
 		time.tm_min = CMOS_READ(2);
 		time.tm_hour = CMOS_READ(4);
 		time.tm_mday = CMOS_READ(7);
@@ -94,7 +94,7 @@ static void time_init(void)
 	BCD_TO_BIN(time.tm_mon);
 	BCD_TO_BIN(time.tm_year);
 	time.tm_mon--;
-	startup_time = kernel_mktime(&time);
+	startup_time = kernel_mktime(&time);  // 这里设置了系统的启动时间
 }
 
 static long memory_end = 0;
@@ -112,7 +112,7 @@ void main(void)		/* This really IS void, no error here. */
 
  	ROOT_DEV = ORIG_ROOT_DEV;
  	drive_info = DRIVE_INFO;
-	memory_end = (1<<20) + (EXT_MEM_K<<10);
+	memory_end = (1<<20) + (EXT_MEM_K<<10);  // EXT_MEM_K存放的是内存的KB数
 	memory_end &= 0xfffff000;
 	if (memory_end > 16*1024*1024)
 		memory_end = 16*1024*1024;
@@ -141,13 +141,14 @@ void main(void)		/* This really IS void, no error here. */
 	if (!fork()) {		/* we count on this going ok */
 		init();
 	}
-/*
- *   NOTE!!   For any other task 'pause()' would mean we have to get a
- * signal to awaken, but task0 is the sole exception (see 'schedule()')
- * as task 0 gets activated at every idle moment (when no other tasks
- * can run). For task0 'pause()' just means we go check if some other
- * task can run, and if not we return here.
- */
+	
+	/*
+	*   NOTE!!   For any other task 'pause()' would mean we have to get a
+	* signal to awaken, but task0 is the sole exception (see 'schedule()')
+	* as task 0 gets activated at every idle moment (when no other tasks
+	* can run). For task0 'pause()' just means we go check if some other
+	* task can run, and if not we return here.
+	*/
 	for(;;) pause();
 }
 

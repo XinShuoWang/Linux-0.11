@@ -76,12 +76,12 @@ go:	mov	%cs, %ax		#将ds，es，ss都设置成移动后代码所在的段处(0x9
 #
 load_setup:
 	mov	$0x0000, %dx		# drive 0, head 0
-	mov	$0x0002, %cx		# sector 2, track 0
+	mov	$0x0002, %cx		# sector 2, track 0，bootsector占据了第一个扇区
 	mov	$0x0200, %bx		# address = 512, in INITSEG
 	.equ    AX, 0x0200+SETUPLEN
-	mov     $AX, %ax		# service 2, nr of sectors
+	mov     $AX, %ax		# service 2, nr of sectors，读取的扇区数
 	int	$0x13			# read it
-	jnc	ok_load_setup		# ok - continue
+	jnc	ok_load_setup		# ok - continue，转移指令。意思是CF=0，则跳转，否则再次执行
 	mov	$0x0000, %dx
 	mov	$0x0000, %ax		# reset the diskette
 	int	$0x13
